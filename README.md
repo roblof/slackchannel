@@ -135,3 +135,4 @@ Koden har inga npm-beroenden – den använder bara inbyggda Node-moduler och
 `fetch`.
 
 <!-- Touch to force GitHub Actions workflow re-registration. -->
+<!-- Re-registration touch: 2026-11-21 -->

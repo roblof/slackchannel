@@ -1,0 +1,32 @@
+[
+  {
+    "id": "lever-manadsrapport",
+    "title": "Lever månadsrapport till ledningen",
+    "assignee": "Anna",
+    "assignee_slack_id": "U0123ABCD",
+    "deadline": "2026-11-25T15:00:00+01:00",
+    "remind_hours_before": 2,
+    "status": "open",
+    "reminded": false
+  },
+  {
+    "id": "bestall-kontorsmaterial",
+    "title": "Beställ kontorsmaterial inför december",
+    "assignee": "Johan",
+    "assignee_slack_id": "",
+    "deadline": "2026-11-28T09:00:00+01:00",
+    "remind_hours_before": 3,
+    "status": "open",
+    "reminded": false
+  },
+  {
+    "id": "planera-sommarfest",
+    "title": "Planera sommarfesten",
+    "assignee": "Mia",
+    "assignee_slack_id": "U0456WXYZ",
+    "deadline": "2026-07-20T15:00:00+02:00",
+    "remind_hours_before": 2,
+    "status": "open",
+    "reminded": false
+  }
+]

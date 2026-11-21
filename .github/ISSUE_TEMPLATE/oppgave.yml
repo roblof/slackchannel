@@ -1,0 +1,53 @@
+name: "Oppgave"
+description: "Lägg till en ny uppgift med frist och påminnelse."
+title: "[Oppgave]: "
+labels: ["oppgave"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fyll i uppgiften nedan. När du sparar skapas den i listan automatiskt,
+        och en påminnelse skickas i Slack ~2 timmar före fristen.
+        Stäng ärendet (Close issue) när uppgiften är klar.
+  - type: input
+    id: titel
+    attributes:
+      label: Titel
+      description: Vad ska göras?
+      placeholder: "Lever månadsrapport"
+    validations:
+      required: true
+  - type: input
+    id: ansvarig
+    attributes:
+      label: Ansvarig (namn)
+      description: Visningsnamn på den som ansvarar.
+      placeholder: "Anna"
+    validations:
+      required: true
+  - type: input
+    id: slack_id
+    attributes:
+      label: Slack-ID (valfritt)
+      description: >
+        Slack member ID (t.ex. U0123ABCD) för en riktig @-pling. Lämna tomt om
+        du inte vet det. Se README för hur du hittar det.
+      placeholder: "U0123ABCD"
+    validations:
+      required: false
+  - type: input
+    id: frist
+    attributes:
+      label: Frist
+      description: "Format: YYYY-MM-DD HH:MM (lokal tid, Europe/Stockholm)."
+      placeholder: "2026-11-25 15:00"
+    validations:
+      required: true
+  - type: input
+    id: timmar_innan
+    attributes:
+      label: Timmar innan
+      description: Hur många timmar före fristen påminnelsen ska skickas.
+      value: "2"
+    validations:
+      required: false

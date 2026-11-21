@@ -1,0 +1,58 @@
+name: Lägg till / uppdatera uppgift
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: add-task-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    # Kör bara för ärenden med etiketten "oppgave".
+    if: contains(join(github.event.issue.labels.*.name, ','), 'oppgave')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checka ut koden
+        uses: actions/checkout@v4
+
+      - name: Sätt upp Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Uppdatera tasks.json från ärendet
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_ACTION: ${{ github.event.action }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          COMMENT_FILE: ${{ runner.temp }}/comment.md
+        run: node scripts/add-task.mjs
+
+      - name: Committa tasks.json om den ändrats
+        run: |
+          if [[ -n "$(git status --porcelain tasks.json)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add tasks.json
+            git commit -m "Synka uppgift från ärende #${{ github.event.issue.number }} [skip ci]"
+            git push
+          else
+            echo "Inget att committa."
+          fi
+
+      - name: Kommentera på ärendet
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMENT_FILE: ${{ runner.temp }}/comment.md
+        run: |
+          if [[ -f "$COMMENT_FILE" ]]; then
+            gh issue comment "${{ github.event.issue.number }}" \
+              --repo "${{ github.repository }}" \
+              --body-file "$COMMENT_FILE"
+          fi

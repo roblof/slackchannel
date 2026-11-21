@@ -1,0 +1,16 @@
+{
+  "name": "slackchannel-oppgaver",
+  "version": "1.0.0",
+  "description": "Serverlös att-göra-lista för #oppgaver med Slack-påminnelser via GitHub Actions.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "remind": "node scripts/remind.mjs",
+    "remind:dry": "node scripts/remind.mjs --dry-run"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,39 @@
+name: Uppgiftspåminnelser
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: paminnelser
+  cancel-in-progress: false
+
+jobs:
+  paminnelser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Installera beroenden
+        run: pip install pyyaml
+      - name: Skicka påminnelser
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: python scripts/skicka_paminnelser.py
+      - name: Spara state
+        run: |
+          if ! git diff --quiet -- .paminnelse_state.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add .paminnelse_state.json
+            git commit -m "Uppdatera påminnelse-state [skip ci]"
+            git push
+          else
+            echo "Inget att spara."
+          fi

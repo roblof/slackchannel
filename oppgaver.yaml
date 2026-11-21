@@ -1,0 +1,25 @@
+# ============================================================
+#  UPPGIFTER (att göra-lista)
+#  Lägg till en uppgift genom att kopiera ett block under
+#  "uppgifter:" och fylla i. Spara/commit:a filen så sköter
+#  GitHub resten. Påminnelse skickas automatiskt ett par
+#  timmar före deadline till Slack-kanalen #oppgaver.
+# ============================================================
+
+installningar:
+  tidszon: Europe/Stockholm        # deadlines tolkas i denna tidszon
+  paminnelse_timmar_innan: 2       # standard: påminn 2 timmar före deadline
+  # Koppla ett namn till personens Slack-medlems-ID så att
+  # påminnelsen pingar rätt person. Hitta ID:t i Slack:
+  # klicka på personens namn -> "Kopiera medlems-ID".
+  medlemmar:
+    anna: U00000000ANNA
+    # erik: U00000000ERIK
+
+uppgifter:
+  - id: 1
+    uppgift: "Exempel – ta bort denna rad: lämna in månadsrapport"
+    ansvarig: anna                 # namn från "medlemmar", eller ett Slack-ID (U...), eller vanlig text
+    deadline: "2026-12-01 15:00"   # format: ÅÅÅÅ-MM-DD HH:MM
+    status: open                   # open = aktiv, done = klar
+    # paminnelse_timmar_innan: 3   # (valfritt) egen påminnelsetid för just denna uppgift

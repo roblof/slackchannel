@@ -121,6 +121,60 @@ Redigerar du filen manuellt: sätt `"status": "done"`.
 
 ---
 
+## (Valfritt) Styr uppgifterna från en visuell Slack-lista
+
+Vill du hellre sköta uppgifterna på en **Slack-lista** (det visuella brädet som
+finns på betalda Slack-planer) i stället för i filen `tasks.json`? Då kan du det
+– påminnelserna fungerar precis likadant, men hämtas automatiskt från brädet.
+
+> Det här är **helt frivilligt**. Gör du ingenting fortsätter allt som förut med
+> `tasks.json`. Funktionen slås bara på om du lägger till de två sakerna nedan.
+
+**1. Ge Slack-appen läsrättighet till listor**
+
+1. Gå till **https://api.slack.com/apps** och öppna din app (samma som du skapade
+   för webhooken, t.ex. "Oppgaver").
+2. Välj **OAuth & Permissions** i menyn.
+3. Under **Scopes → Bot Token Scopes**, klicka **Add an OAuth Scope** och lägg
+   till **`lists:read`**.
+4. Klicka **Install to Workspace** (eller **Reinstall**) högst upp och godkänn.
+5. Kopiera **Bot User OAuth Token** – den börjar med `xoxb-`.
+
+**2. Lägg till token som en GitHub-secret**
+
+Repo → **Settings → Secrets and variables → Actions → New repository secret**:
+- **Name:** `SLACK_BOT_TOKEN`
+- **Secret:** klistra in `xoxb-…`-token.
+
+**3. Skapa listan "Oppgaver"**
+
+1. I Slack: klicka **+** (Nytt) → **Lista**, eller öppna en kanal och lägg till
+   en **Lista**. Välj gärna mallen **Projektspårare** (Project tracker).
+2. Se till att listan har kolumner för **Oppgave/uppgift**, **Ansvarlig**
+   (persontyp), **Frist** (datumtyp) och **Status**. Namnen får vara på norska,
+   svenska eller engelska – systemet känner igen dem automatiskt.
+
+**4. Hitta listans ID**
+
+1. Öppna listan i Slack → klicka **Dela** (eller "…"-menyn) → **Kopiera länk**.
+2. Länken ser ut som `https://app.slack.com/lists/T123ABC/F0123LIST…`.
+   Delen som börjar på **`F`** (t.ex. `F0123LIST`) är **listans ID**.
+3. Lägg till det i GitHub under **Settings → Secrets and variables → Actions**,
+   antingen som en secret eller en **variable** med namnet **`SLACK_LIST_ID`**.
+
+**Klart!** När både `SLACK_BOT_TOKEN` och `SLACK_LIST_ID` finns läser det
+schemalagda jobbet uppgifterna direkt från brädet var 15:e minut och skickar
+påminnelser på samma sätt som förut (fortfarande via webhooken till `#oppgaver`).
+Markerar du en uppgift som klar på brädet skickas ingen påminnelse.
+
+- En uppgift utan ifylld **Frist** hoppas över (det finns inget att påminna om).
+- Har en frist bara ett datum (ingen klockan) används **17:00** som standardtid.
+  Ändra med variabeln `SLACK_LIST_DUE_DEFAULT_TIME` (t.ex. `09:00`).
+- Dubbletter undviks via en liten statusfil `.reminder-state.json` som jobbet
+  sparar tillbaka – varje påminnelse skickas bara en gång.
+
+---
+
 ## Utveckling
 
 ```bash

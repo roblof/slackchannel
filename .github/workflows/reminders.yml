@@ -28,14 +28,19 @@ jobs:
       - name: Kör påminnelse-skriptet
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          # Valfritt: om BÅDA dessa är satta läses uppgifterna från en Slack-lista
+          # i stället för tasks.json. Saknas någon av dem används tasks.json som förr.
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_LIST_ID: ${{ secrets.SLACK_LIST_ID || vars.SLACK_LIST_ID }}
         run: node scripts/remind.mjs
 
-      - name: Committa uppdaterad tasks.json om den ändrats
+      - name: Committa uppdaterad status om den ändrats
         run: |
-          if [[ -n "$(git status --porcelain tasks.json)" ]]; then
+          if [[ -n "$(git status --porcelain tasks.json .reminder-state.json)" ]]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add tasks.json
+            [[ -f tasks.json ]] && git add tasks.json
+            [[ -f .reminder-state.json ]] && git add .reminder-state.json
             git commit -m "Uppdatera påminnelse-status [skip ci]"
             git push
           else

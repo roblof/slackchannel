@@ -133,3 +133,5 @@ npm run remind:dry
 
 Koden har inga npm-beroenden – den använder bara inbyggda Node-moduler och
 `fetch`.
+
+<!-- Touch to force GitHub Actions workflow re-registration. -->

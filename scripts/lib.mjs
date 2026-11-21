@@ -4,6 +4,42 @@
 export const DEFAULT_REMIND_HOURS_BEFORE = 2;
 export const STOCKHOLM_TZ = "Europe/Stockholm";
 
+// Tracker metadata used by the issue form (Prioritet / Status).
+export const DEFAULT_PRIORITY = "Medel";
+export const DEFAULT_STATUS = "Att göra";
+// Statuses that mean the task is finished and must not trigger reminders.
+// "done" is the legacy lifecycle value; "Klar" is the board value.
+export const DONE_STATUSES = ["done", "Klar"];
+
+/**
+ * Normalize a Prioritet value, falling back to the default when missing.
+ * @param {string|undefined|null} value
+ * @returns {string}
+ */
+export function normalizePriority(value) {
+  const s = String(value ?? "").trim();
+  return s || DEFAULT_PRIORITY;
+}
+
+/**
+ * Normalize a Status value, falling back to the default when missing.
+ * @param {string|undefined|null} value
+ * @returns {string}
+ */
+export function normalizeStatus(value) {
+  const s = String(value ?? "").trim();
+  return s || DEFAULT_STATUS;
+}
+
+/**
+ * Whether a task's status means it is finished (so no reminder should fire).
+ * @param {string|undefined|null} status
+ * @returns {boolean}
+ */
+export function isDoneStatus(status) {
+  return DONE_STATUSES.includes(status);
+}
+
 /**
  * Compute the UTC offset (in minutes, east-positive) of a time zone at a
  * given instant. Uses Intl so DST (CET +01:00 vs CEST +02:00) is handled
@@ -125,7 +161,9 @@ export function reminderWindowStart(task) {
  * @returns {boolean}
  */
 export function shouldRemind(task, now = new Date()) {
-  if (!task || task.status !== "open") return false;
+  // Fire for any task that is not finished. Lifecycle "done" and the board
+  // status "Klar" both count as finished; "open", "Att göra" and "Pågår" fire.
+  if (!task || isDoneStatus(task.status)) return false;
   if (task.reminded === true) return false;
   if (!task.deadline) return false;
   const deadline = new Date(task.deadline);

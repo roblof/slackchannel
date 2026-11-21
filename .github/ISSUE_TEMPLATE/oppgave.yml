@@ -17,6 +17,18 @@ body:
       placeholder: "Lever månadsrapport"
     validations:
       required: true
+  - type: dropdown
+    id: prioritet
+    attributes:
+      label: Prioritet
+      description: Hur viktig är uppgiften?
+      options:
+        - Hög
+        - Medel
+        - Låg
+      default: 1
+    validations:
+      required: true
   - type: input
     id: ansvarig
     attributes:
@@ -51,3 +63,15 @@ body:
       value: "2"
     validations:
       required: false
+  - type: dropdown
+    id: status
+    attributes:
+      label: Status
+      description: Startstatus för uppgiften.
+      options:
+        - Att göra
+        - Pågår
+        - Klar
+      default: 0
+    validations:
+      required: true

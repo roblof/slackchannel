@@ -69,11 +69,14 @@ bara skriva namnet:
 1. Gå till fliken **Issues** i repot → **New issue** → välj mallen **Oppgave**.
 2. Fyll i:
    - **Titel** – vad som ska göras
+   - **Prioritet** – `Hög`, `Medel` eller `Låg` (standard `Medel`)
    - **Ansvarig (namn)** – visningsnamn
    - **Slack-ID (valfritt)** – för en riktig @-pling
    - **Frist** – `YYYY-MM-DD HH:MM` (lokal tid, Europe/Stockholm), t.ex.
      `2026-11-25 15:00`
    - **Timmar innan** – hur långt i förväg påminnelsen ska skickas (standard 2)
+   - **Status** – startstatus på tavlan: `Att göra`, `Pågår` eller `Klar`
+     (standard `Att göra`). En uppgift med statusen `Klar` får inga påminnelser.
 3. Spara. En bot lägger automatiskt till uppgiften i `tasks.json` och
    kommenterar på ärendet för att bekräfta. Sommar-/vintertid räknas ut åt dig.
 
@@ -85,18 +88,23 @@ Du kan också redigera [`tasks.json`](./tasks.json) direkt. En uppgift ser ut s�
 {
   "id": "unik-slug",
   "title": "Lever rapport",
+  "priority": "Medel",
   "assignee": "Anna",
   "assignee_slack_id": "U0123ABCD",
   "deadline": "2026-11-25T15:00:00+01:00",
   "remind_hours_before": 2,
-  "status": "open",
+  "status": "Att göra",
   "reminded": false
 }
 ```
 
 - `deadline` ska vara i **ISO 8601 med tidszon-offset** (`+01:00` vinter,
   `+02:00` sommar).
+- `priority` är valfritt (`Hög`/`Medel`/`Låg`, standard `Medel`).
 - `remind_hours_before` är valfritt (standard 2).
+- `status` är uppgiftens läge på tavlan: `Att göra`, `Pågår` eller `Klar`.
+  Statusen `Klar` (liksom den äldre lifecykel-statusen `done`) stänger av
+  påminnelserna; alla andra värden är aktiva.
 - Sätt `reminded: false` så skickas påminnelsen.
 
 ---
@@ -114,8 +122,9 @@ Redigerar du filen manuellt: sätt `"status": "done"`.
 
 - Jobbet [`.github/workflows/reminders.yml`](./.github/workflows/reminders.yml)
   körs **var 15:e minut** (och kan köras manuellt via **Run workflow**).
-- En påminnelse skickas när: `status` är `open`, `reminded` är `false`, och
-  klockan är **mellan (frist − timmar innan) och fristen**.
+- En påminnelse skickas när: uppgiften inte är klar (`status` är varken `Klar`
+  eller `done`), `reminded` är `false`, och klockan är **mellan (frist − timmar
+  innan) och fristen**.
 - Efter en lyckad påminnelse sätts `reminded: true` och ändringen committas
   tillbaka till repot, så samma påminnelse inte skickas två gånger.
 

@@ -13,7 +13,12 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { localWallClockToISO, formatDeadline } from "./lib.mjs";
+import {
+  localWallClockToISO,
+  formatDeadline,
+  normalizePriority,
+  normalizeStatus,
+} from "./lib.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TASKS_PATH = path.resolve(__dirname, "..", "tasks.json");
@@ -102,10 +107,12 @@ export async function main(env = process.env) {
   try {
     const fields = parseIssueForm(env.ISSUE_BODY);
     const title = pick(fields, "titel");
+    const priority = normalizePriority(pick(fields, "prioritet"));
     const assignee = pick(fields, "ansvarig");
     const slackId = pick(fields, "slack");
     const fristRaw = pick(fields, "frist");
     const hoursRaw = pick(fields, "timmar");
+    const status = normalizeStatus(pick(fields, "status"));
 
     if (!title) throw new Error("Fältet **Titel** saknas.");
     if (!assignee) throw new Error("Fältet **Ansvarig** saknas.");
@@ -124,11 +131,12 @@ export async function main(env = process.env) {
       id: taskId,
       slug: slugify(title),
       title,
+      priority,
       assignee,
       assignee_slack_id: slackId || "",
       deadline,
       remind_hours_before: remindHours,
-      status: action === "reopened" && idx !== -1 ? "open" : "open",
+      status,
       // Preserve reminded flag on edits unless the deadline moved.
       reminded:
         idx !== -1 && tasks[idx].deadline === deadline
@@ -143,6 +151,7 @@ export async function main(env = process.env) {
     await writeComment(
       commentFile,
       `✅ Uppgift sparad: *${title}* för ${assignee}.\n` +
+        `Prioritet: ${priority}. Status: ${status}.\n` +
         `Frist: ${formatDeadline(deadline)} (${deadline}).\n` +
         `Påminnelse skickas ${remindHours} timme(r) innan. Stäng ärendet när det är klart.`
     );

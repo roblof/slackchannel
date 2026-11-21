@@ -11,7 +11,11 @@ import {
   getTimeZoneOffsetMinutes,
   formatOffset,
   remindHoursBefore,
+  normalizePriority,
+  normalizeStatus,
+  isDoneStatus,
 } from "./lib.mjs";
+import { parseIssueForm } from "./add-task.mjs";
 
 function baseTask(overrides = {}) {
   return {
@@ -188,4 +192,55 @@ test("localWallClockToISO round-trips to the intended instant (summer)", () => {
 
 test("localWallClockToISO rejects a bad format", () => {
   assert.throws(() => localWallClockToISO("25/11/2026 3pm"));
+});
+
+// --- Tracker metadata (Prioritet / Status) ---
+
+test("normalizePriority/normalizeStatus fall back to defaults", () => {
+  assert.equal(normalizePriority("Hög"), "Hög");
+  assert.equal(normalizePriority(""), "Medel");
+  assert.equal(normalizePriority(undefined), "Medel");
+  assert.equal(normalizeStatus("Pågår"), "Pågår");
+  assert.equal(normalizeStatus(""), "Att göra");
+  assert.equal(normalizeStatus(undefined), "Att göra");
+});
+
+test("tracker fields parse from an issue body with Prioritet/Status", () => {
+  const body = [
+    "### Titel",
+    "Lever rapport",
+    "### Prioritet",
+    "Hög",
+    "### Status",
+    "Pågår",
+    "### Frist",
+    "2026-11-25 15:00",
+  ].join("\n\n");
+  const fields = parseIssueForm(body);
+  assert.equal(normalizePriority(fields["prioritet"]), "Hög");
+  assert.equal(normalizeStatus(fields["status"]), "Pågår");
+});
+
+test("tracker fields fall back when the headings are missing (older issues)", () => {
+  const body = ["### Titel", "Lever rapport", "### Frist", "2026-11-25 15:00"].join(
+    "\n\n"
+  );
+  const fields = parseIssueForm(body);
+  assert.equal(normalizePriority(fields["prioritet"]), "Medel");
+  assert.equal(normalizeStatus(fields["status"]), "Att göra");
+});
+
+test("isDoneStatus treats 'done' and 'Klar' as finished", () => {
+  assert.equal(isDoneStatus("done"), true);
+  assert.equal(isDoneStatus("Klar"), true);
+  assert.equal(isDoneStatus("open"), false);
+  assert.equal(isDoneStatus("Att göra"), false);
+  assert.equal(isDoneStatus("Pågår"), false);
+});
+
+test("shouldRemind: board status 'Pågår' fires, 'Klar' does not", () => {
+  const now = new Date("2026-11-25T13:00:00Z");
+  assert.equal(shouldRemind(baseTask({ status: "Pågår" }), now), true);
+  assert.equal(shouldRemind(baseTask({ status: "Att göra" }), now), true);
+  assert.equal(shouldRemind(baseTask({ status: "Klar" }), now), false);
 });
